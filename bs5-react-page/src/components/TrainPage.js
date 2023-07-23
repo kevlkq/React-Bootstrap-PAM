@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Transitions from './Transition'
 import { motion } from 'framer-motion';
-import './TrainButtons.css';
-
-
+import stylesTrain from './TrainButtons.module.css';
+import DatasetPreviewModal from './DatasetPreviewModal';
+import CsvHeadersModal from './CsvHeadersModal';
+// import DropColModal from './DropColModal'; 
 
 const TrainPage = () => {
   const [csvFile, setCsvFile] = useState(null);
@@ -18,7 +19,23 @@ const TrainPage = () => {
   const [selectedHeader, setSelectedHeader] = useState('');
   const [selectedYVariable, setSelectedYVariable] = useState('');
   const [results, setResults] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const fileInputRef = useRef(null); 
+  const [showButtons, setShowButtons] = useState(false);
+  const [showPreview, setShowPreview] = useState(false); 
+  const handlePreviewDataset = () => {setShowPreview(true); };
+  const handleCloseModal = () => {setShowPreview(false); };
+  // const [DropColPreview, setDropColPreview] = useState(false); 
+  // const handleDropColPreview = () => {setDropColPreview(true);};
+  const [showCsvHeaders, setShowCsvHeaders] = useState(false);
+  const handleShowCsvHeaders = () => {setShowCsvHeaders(true); };
 
+
+  useEffect(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = null;
+    }
+  }, [uploadStatus]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -45,9 +62,17 @@ const TrainPage = () => {
         setEditedCsvFilePath(response.data.editedCsvFilePath);
         const csvFilename = csvFile.name;
         setOutputFilePath(csvFilename);
+        setUploadStatus('success');
+        setShowButtons(true);
+        setTimeout(() => setUploadStatus(''), 3000);
+
       })
       .catch((error) => {
         console.error(error);
+        setUploadStatus('error');
+        setShowButtons(false);
+        setTimeout(() => setUploadStatus(''), 3000);
+
       });
   };
 
@@ -122,23 +147,23 @@ const TrainPage = () => {
 
   return (
     <Transitions>
-    <div className="container">
-      <div className="models-container">
+    <div className={stylesTrain.container}>
+      <div className={stylesTrain.modelsContainer}>
         <form onSubmit={handleSubmit}>
           <fieldset>
             <legend className="mb-3">Select Models to Train</legend>
-            <div className="checkbox-container d-flex flex-wrap">
+            <div className={stylesTrain.checkboxContainer}>
               <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="LinearRegression"
-                  name="models"
-                  value="LinearRegressionTrain"
-                />
-                <label className="form-check-label" htmlFor="LinearRegression">
-                  Linear Regression
-                </label>
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="LinearRegression"
+                    name="models"
+                    value="LinearRegressionTrain"
+                  />
+                  <label className="form-check-label" htmlFor="LinearRegression">
+                    Linear Regression
+                  </label>
               </div>
 
               <div className="form-check">
@@ -219,14 +244,11 @@ const TrainPage = () => {
                 </label>
               </div>
             </div>
-            <button type="submit" className="btn btn-primary">
-              Train Selected Models
-            </button>
           </fieldset>
         </form>
       </div>
 
-      <div className="button-container">
+      <div className={stylesTrain.buttonContainer}>
         <form encType="multipart/form-data">
           <div className="mb-3">
             <input
@@ -237,49 +259,70 @@ const TrainPage = () => {
               onChange={handleFileChange}
             />
           </div>
-          <button type="button" className="btn btn-primary" onClick={handleUpload}>
-            Upload CSV
-          </button>
+            <div className={stylesTrain.buttonsWrapper}>
+              <button type="button" className="btn btn-primary" onClick={handleUpload}>
+                Upload CSV
+              </button>
+              {uploadStatus === 'success' && (
+              <div className="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                File uploaded successfully!
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="alert"
+                  aria-label="Close"
+                  onClick={() => setUploadStatus('')}
+                ></button>
+              </div>
+              )}
+              {uploadStatus === 'error' && (
+                <div className="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                  Error uploading file. Please make sure you selected a valid CSV file.
+                  <button
+                    type="button"
+                    className="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"
+                    onClick={() => setUploadStatus('')}
+                  ></button>
+                </div>
+              )}
+              {showButtons && ( 
+              <div className={stylesTrain.buttonsContainer}>
+                <button type="button" className="btn btn-primary me-3" onClick={handlePreviewDataset}>
+                  Preview of Dataset
+                </button>
+                <button type="button" className="btn btn-primary me-3"onClick={handleShowCsvHeaders}>
+                  Choose Columns to Drop
+                </button>
+                <button type="button" className="btn btn-primary">
+                  Choose Target Variable
+                </button>
+              </div>
+              )}
+              
+              <button type="submit" className="btn btn-success" >
+                Train Selected Models
+              </button>
+            </div>
+          
+
         </form>
       </div>
 
       {/* Display CSV headers */}
-      {displayedCsvHeaders.length > 0 && (
-        <div className="csv-data-container">
-          <div className="csv-header-container">
-            <h2>CSV Headers</h2>
-            <div className="csv-filename">CSV Filename: {outputFilePath}</div>
-            <div className="selected-y-variable">
-              Selected Y Variable: {selectedYVariable}
-            </div>
-            <div className="csv-header-list">
-              {displayedCsvHeaders.map((header, index) => (
-                <div key={index} className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id={`headerCheckbox_${index}`}
-                    name={`headerCheckbox_${index}`}
-                    value={header}
-                    onChange={(e) => handleCheckboxChange(e, header)}
-                  />
-                  <label className="form-check-label" htmlFor={`headerCheckbox_${index}`}>
-                    {header}
-                  </label>
-                </div>
-              ))}
-            </div>
-            <div className="btn-container">
-              <button type="button" className="btn btn-danger" onClick={handleDropColumns}>
-                Drop Column
-              </button>
-              <button type="button" className="btn btn-success" onClick={handleChooseYvariable}>
-                Choose Target Variable
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CsvHeadersModal
+      show={showCsvHeaders}
+      handleClose={() => setShowCsvHeaders(false)}
+      displayedCsvHeaders={displayedCsvHeaders}
+      outputFilePath={outputFilePath}
+      selectedYVariable={selectedYVariable}
+      handleCheckboxChange={handleCheckboxChange}
+      handleDropColumns={handleDropColumns}
+      handleChooseYvariable={handleChooseYvariable}
+    />
+    <DatasetPreviewModal show={showPreview} handleClose={handleCloseModal} data={csvData} />
+    {/* <DropColModal show={DropColPreview} handleClose={() => setDropColPreview(false)} /> */}
     </div>
     </Transitions>
   );
@@ -288,179 +331,3 @@ const TrainPage = () => {
 export default TrainPage;
 
 
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState } from 'react';
-// import axios from 'axios';
-// import './TrainButtons.css';
-
-// const TrainPage = () => {
-//   const [selectedModels, setSelectedModels] = useState([]);
-//   const [csvFile, setCsvFile] = useState(null);
-
-//   const handleModelChange = (e) => {
-//     const { value, checked } = e.target;
-//     if (checked) {
-//       setSelectedModels((prevModels) => [...prevModels, value]);
-//     } else {
-//       setSelectedModels((prevModels) => prevModels.filter((model) => model !== value));
-//     }
-//   };
-              
-//   const handleFileChange = (e) => {
-//     const file = e.target.files[0];
-//     console.log('Selected file:', file);
-//     setCsvFile(file);
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-  
-//     const formData = new FormData();
-//     formData.append('csvFile', csvFile);
-  
-//     const selectedModels = document.querySelectorAll('input[name="models"]:checked');
-//     selectedModels.forEach((model) => {
-//       formData.append('models', model.value);
-//     });
-//     console.log("BEUIFGBAQUIGBIGIBIG",formData);
-//     axios
-//       .post('http://localhost:3333/trainModels', formData)
-//       .then((response) => {
-//         console.log(response.data);
-//       })
-//       .catch((error) => {
-//         console.error(error);
-//       });
-//   };
-  
-
-//   const handleUpload = (e) => {
-//     e.preventDefault();
-
-//     console.log('Uploading file:', csvFile);
-
-//     const formData = new FormData();
-//     formData.append('csvFile', csvFile);
-
-//     axios
-//       .post('http://localhost:3333/upload-csv', formData)
-//       .then((response) => {
-//         console.log(response.data);
-//       })
-//       .catch((error) => {
-//         console.error(error);
-//       });
-//   };
-
-  
-
-//   return (
-//     <div>
-//       <form onSubmit={handleSubmit}>
-//       <fieldset>
-//           <legend>Select Models to Train</legend>
-
-//           <div className="model-checkbox">
-//             <input
-//               type="checkbox"
-//               id="LinearRegression"
-//               name="models"
-//               value="LinearRegressionTrain"
-//               // onChange={handleModelChange}
-//             />
-//             <label htmlFor="LinearRegression">LinearRegression</label>
-//           </div>
-              
-//           <div className="model-checkbox">
-//             <input
-//                 type="checkbox"
-//                 id="KNN"
-//                 name="models"
-//                 value="KNNTrain"
-//                 // onChange={handleModelChange}
-//               />
-//             <label htmlFor="KNN">KNN</label>
-//           </div>
-
-//           <div className="model-checkbox">
-//             <input
-//                 type="checkbox"
-//                 id="svm"
-//                 name="models"
-//                 value="SVMTrain"
-//                 // onChange={handleModelChange}
-//               />
-//             <label htmlFor="svm">SVM</label>
-//           </div>
-
-//           <div className="model-checkbox">
-//             <input
-//                 type="checkbox"
-//                 id="lstm"
-//                 name="models"
-//                 value="LSTMTrain"
-//                 // onChange={handleModelChange}
-//               />
-//             <label htmlFor="LSTM">LSTM</label>
-//           </div>
-
-//           <div className="model-checkbox">
-//             <input
-//                 type="checkbox"
-//                 id="randomForest"
-//                 name="models"
-//                 value="RandomForestTrain"
-//                 // onChange={handleModelChange}
-//               />
-//             <label htmlFor="randomForest">Random Forest</label>
-//           </div>
-
-//           <div className="model-checkbox">
-//             <input
-//                 type="checkbox"
-//                 id="gradientBoost"
-//                 name="models"
-//                 value="GradientBoostTrain"
-//                 // onChange={handleModelChange}
-//               />
-//             <label htmlFor="gradientBoost">Gradient Boost</label>
-//           </div>
-
-//           <div className="model-checkbox">
-//             <input
-//                 type="checkbox"
-//                 id="xgBoost"
-//                 name="models"
-//                 value="XGBoostTrain"
-//                 // onChange={handleModelChange}
-//               />
-//             <label htmlFor="XGBoost">LSTM</label>
-//           </div>
-
-//           <input type="hidden" name="csvFilePath" value="csvFilePath" />
-//           <input type="submit" value="Run Selected Models" className="button" />
-//         </fieldset>
-
-//       </form>
-
-//       <div className="button-container">
-//       <form encType="multipart/form-data">
-//           <input type="file" id="myFile" name="csvFile" onChange={handleFileChange} />
-//           <button type="button" onClick={handleUpload}>Upload CSV</button>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default TrainPage;
