@@ -14,7 +14,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
 import Home from './components/Home';
 import TrainPage from './components/TrainPage';
-// import TestPage from './components/TestPage';
+import TestPage from './components/TestPage';
 // import ExecutePage from './components/ExecutePage';
 import { AnimatePresence } from 'framer-motion';
 
@@ -25,6 +25,8 @@ const Animated = () => {
       <Routes location={location} key={location.pathname}>
         <Route exact path="/" element={<Home />} />
         <Route exact path="/TrainPage" element={<TrainPage />} />
+        <Route exact path="/TestPage" element={<TestPage />} />
+
       </Routes>
     </AnimatePresence>
   );

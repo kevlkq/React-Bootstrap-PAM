@@ -132,11 +132,12 @@ app.post('/trainModels', (req, res) => {
   const processNextModel = (index) => {
     if (index >= selectedModels.length) {
       console.log('Finished training all models');
+      res.send({ message: 'All models trained successfully!' });
       return;
     }
-
+  
     const modelName = selectedModels[index];
-    console.log('modelName:', modelName); 
+    console.log('modelName:', modelName);
     runModel(modelName, (err) => {
       if (err) {
         res.status(500).send(`Error running ${modelName}`);

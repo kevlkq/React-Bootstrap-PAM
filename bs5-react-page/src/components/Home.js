@@ -28,32 +28,30 @@ const Home = () => {
     return (
      <Transitions>
         <header >
-        <Navbar bg="warning" data-bs-theme="light">
-          <Container>
-            <Navbar.Brand href="#home">
-            <img
-                alt=""
-                src="https://www.startupsg.gov.sg/api/v0/profile-images/2447/image/avatar"
-                width="75"
-                height="75"
-                className="d-inline-block align-center"
-              />{' '}Oak Consulting</Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-              <Nav className="me-auto">
-              <Nav.Link className="font-weight-dark" href="#home">HomePage</Nav.Link>
-              <Nav.Link className="font-weight-dark" href="#link">Link</Nav.Link>
-                <NavDropdown title="Navigate to" id="basic-nav-dropdown">
-                  <NavDropdown.Item href="#action/3.1">Training</NavDropdown.Item>
-                  <NavDropdown.Item href="#action/3.2">
-                    Testing
-                  </NavDropdown.Item>
-                  <NavDropdown.Item href="#action/3.3">Predictions</NavDropdown.Item>
-                </NavDropdown>
-              </Nav>
-            </Navbar.Collapse>
-          </Container>
-        </Navbar>
+          <Navbar bg="warning" data-bs-theme="light">
+            <Container>
+              <Navbar.Brand href="#home">
+              <img
+                  alt=""
+                  src="https://www.startupsg.gov.sg/api/v0/profile-images/2447/image/avatar"
+                  width="75"
+                  height="75"
+                  className="d-inline-block align-center"
+                />{' '}Oak Consulting</Navbar.Brand>
+              <Navbar.Toggle aria-controls="basic-navbar-nav" />
+              <Navbar.Collapse id="basic-navbar-nav">
+                <Nav className="me-auto">
+                  <Nav.Link as={Link} to="/" >HomePage</Nav.Link>
+                  <Nav.Link href="#link">Link</Nav.Link>
+                  <NavDropdown title="Dropdown" id="basic-nav-dropdown">
+                  <NavDropdown.Item as={Link} to="/TrainPage">Training Page</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/TestPage">Testing Page</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/ExecutePage">Predictions Page</NavDropdown.Item>
+                  </NavDropdown>
+                </Nav>
+              </Navbar.Collapse>
+            </Container>
+          </Navbar>
         </header>
         <main>
         <Container>
@@ -88,7 +86,7 @@ const Home = () => {
                 <Card.Text>
                   Here you can Train your model using your dataset
                 </Card.Text>
-                <Link to="/TrainPage"> {/* Use Link to navigate to TrainPage */}
+                <Link to="/TrainPage"> 
                   <button className="button" variant="primary" type="button">Go to Train Page</button>
                 </Link>
               </Card.Body>
