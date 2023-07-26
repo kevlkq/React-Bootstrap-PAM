@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ListGroup from 'react-bootstrap/ListGroup';
 import { Alert } from 'react-bootstrap';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -31,7 +32,7 @@ const TrainPage = () => {
   const [outputFilePath, setOutputFilePath] = useState('');
   const [selectedHeader, setSelectedHeader] = useState('');
   const [selectedYVariable, setSelectedYVariable] = useState('');
-  const [results, setResults] = useState(null);
+
   const [uploadStatus, setUploadStatus] = useState('');
   const fileInputRef = useRef(null); 
   const [showButtons, setShowButtons] = useState(false);
@@ -51,7 +52,7 @@ const TrainPage = () => {
   const [showToolTip, setshowToolTip] = useState(false);
   const [isModelSelected, setIsModelSelected] = useState(false);
   const [selectedModels, setSelectedModels] = useState([]);
-
+  const [results, setResults] = useState([]);
 
 
   const handleFileChange = (e) => {
@@ -130,17 +131,29 @@ const TrainPage = () => {
     console.log('Request body:', requestBody);
   
     axios
-      .post('http://localhost:3333/trainModels', requestBody)
-      .then((response) => {
-        // console.log(response.data);
-        setAlertMessage(response.data.message);
-        setShowAlert(true)
-        console.log(alertMessage);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
+    .post('http://localhost:3333/trainModels', requestBody, {
+      onUploadProgress: (progressEvent) => {
+        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+        // Assuming that 'progress' is the training progress percentage sent by the server
+        setResults((prevResults) =>
+          prevResults.map((model) => ({
+            ...model,
+            status: progress < 100 ? "Training" : "Finished",
+          }))
+        );
+      },
+    })
+    .then((response) => {
+      const trainedModels = response.data.trainedModels; // Assuming the server returns an array of trained model names
+      setResults(trainedModels.map((modelName) => ({ name: modelName, status: "Finished" })));
+      setAlertMessage(response.data.message);
+      setShowAlert(true);
+      console.log(alertMessage);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+};
   
 
 
@@ -418,7 +431,19 @@ const TrainPage = () => {
               {alertMessage}
               <button type="button" className="btn-close" onClick={closeAlert} aria-label="Close"></button>
             </div>
-          )} 
+            )} 
+            <div>
+              {results.length  > 0 && (
+                <div className='mb-5'>
+                  <h3>Trained Models</h3>
+                  <ListGroup>
+                    {results.map((model, index) => (
+                      <ListGroup.Item variant="info" key={index}>{model.name} - {model.status}</ListGroup.Item>
+                    ))}
+                  </ListGroup>
+                </div>
+              )}
+            </div>
           </div>
         </form>
       </div>

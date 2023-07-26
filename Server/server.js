@@ -106,10 +106,14 @@ app.post('/drop-columns', (req, res) => {
 });
 
 
+app.use(require('express').json());
+
 app.post('/trainModels', (req, res) => {
   const csvFilePath = uploadedCsvFilePath;
   const selectedModels = req.body.models.split(',');
   const y = req.body.yVariable;
+
+  const trainedModels = []; // Array to store the names of trained models
 
   const runModel = (modelName, callback) => {
     const options = {
@@ -121,6 +125,7 @@ app.post('/trainModels', (req, res) => {
 
     PythonShell.run(`${modelName}.py`, options)
       .then(() => {
+        trainedModels.push(modelName); // Add the trained model name to the array
         callback();
       })
       .catch((err) => {
@@ -132,10 +137,10 @@ app.post('/trainModels', (req, res) => {
   const processNextModel = (index) => {
     if (index >= selectedModels.length) {
       console.log('Finished training all models');
-      res.send({ message: 'All models trained successfully!' });
+      res.send({ message: 'All models trained successfully!', trainedModels });
       return;
     }
-  
+
     const modelName = selectedModels[index];
     console.log('modelName:', modelName);
     runModel(modelName, (err) => {
@@ -149,6 +154,7 @@ app.post('/trainModels', (req, res) => {
   };
   processNextModel(0);
 });
+
 
 app.post('/testModels', (req, res) => {
   const csvFilePath = uploadedCsvFilePath;
