@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import stylesTrain from './TrainButtons.module.css';
+import { Button } from 'react-bootstrap';
 
 const ChooseYModal = ({ show, handleClose, displayedCsvHeaders, outputFilePath, selectedYVariable, handleCheckboxChange, handleDropColumns, handleChooseYvariable, setShowAlert }) => {
   const [chooseYClicked, setchooseYClicked] = useState(false);
@@ -56,9 +57,15 @@ const ChooseYModal = ({ show, handleClose, displayedCsvHeaders, outputFilePath, 
           </div>
 
           <div className={stylesTrain.buttonContainer}>
-            <button type="button" className="btn btn-success" onClick={handleChooseYClick}>
-              Choose Target Variable
-            </button>
+          <div className={stylesTrain.dropButtonWrapper}>
+              <Button type="button" className="btn btn-success" onClick={handleChooseYClick}>
+                Choose a Target Variable
+              </Button>{' '}
+             
+              <Button type="button" className="btn btn-secondary" onClick={handleClose} aria-label="Close">
+                Close
+              </Button>
+            </div>
           </div>
           {noYSelected && (
             <div className="alert alert-danger alert-dismissible fade show mt-3" role="alert">

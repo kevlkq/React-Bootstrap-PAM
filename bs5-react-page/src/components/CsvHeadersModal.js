@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import stylesTrain from './TrainButtons.module.css';
+import { Button } from 'react-bootstrap';
 
 const CsvHeadersModal = ({ show, handleClose, displayedCsvHeaders, outputFilePath, handleCheckboxChange, handleDropColumns, setShowAlert }) => {
   const [dropButtonClicked, setDropButtonClicked] = useState(false);
@@ -55,9 +56,15 @@ const CsvHeadersModal = ({ show, handleClose, displayedCsvHeaders, outputFilePat
           </div>
 
           <div className={stylesTrain.buttonContainer}>
-            <button type="button" className="btn btn-danger" onClick={handleDropColumnsClick}>
-              Drop Column
-            </button>
+            <div className={stylesTrain.dropButtonWrapper}>
+              <Button type="button" className="btn btn-danger" onClick={handleDropColumnsClick}>
+                Drop Column
+              </Button>{' '}
+             
+              <Button type="button" className="btn btn-secondary" onClick={handleClose} aria-label="Close">
+                Close
+              </Button>
+            </div>
           </div>
 
           {noColumnsSelected && dropButtonClicked && (

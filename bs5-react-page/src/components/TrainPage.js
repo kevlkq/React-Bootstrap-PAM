@@ -248,11 +248,11 @@ const TrainPage = () => {
           </Container>
         </Navbar>
       </header>
+      <legend className="mb-3 mt-5" style={{ fontSize: '36px', fontWeight: 'bold', whiteSpace: 'nowrap', display: 'flex', justifyContent: 'center' }}> Select Models to Train</legend>
     <div className={stylesTrain.container}>
       <div className={stylesTrain.modelsContainer}>
         <form onSubmit={handleSubmit}>
           <fieldset>
-            <legend className="mb-3">Select Models to Train</legend>
             <div className={stylesTrain.checkboxContainer}>
               <div className="form-check">
                   <input

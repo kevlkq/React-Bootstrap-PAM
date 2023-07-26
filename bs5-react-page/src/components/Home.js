@@ -87,7 +87,7 @@ const Home = () => {
                   Here you can Train your model using your dataset
                 </Card.Text>
                 <Link to="/TrainPage"> 
-                  <button className="button" variant="primary" type="button">Go to Train Page</button>
+                  <Button className="button" variant="primary" type="button">Go to Train Page</Button>
                 </Link>
               </Card.Body>
             </Card>
