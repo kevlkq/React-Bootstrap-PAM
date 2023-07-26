@@ -20,7 +20,10 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Image from 'react-bootstrap/Image';
 import { Link } from 'react-router-dom';
-// import DropColModal from './DropColModal'; 
+import { useNavigate } from 'react-router-dom';
+
+
+
 
 const TrainPage = () => {
   const [csvFile, setCsvFile] = useState(null);
@@ -53,7 +56,14 @@ const TrainPage = () => {
   const [isModelSelected, setIsModelSelected] = useState(false);
   const [selectedModels, setSelectedModels] = useState([]);
   const [results, setResults] = useState([]);
+  const [showTrainedModels, setShowTrainedModels] = useState(false);
+  const [csvFilenames, setCsvFilenames] = useState({});
+  const navigate = useNavigate()
 
+  const handleEvaluate = () => {
+    const modelNames = results.map((model) => model.name).join(',');
+    navigate(`/Evaluate?models=${encodeURIComponent(modelNames)}`);
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -128,32 +138,43 @@ const TrainPage = () => {
     const modelValues = Array.from(selectedModels).map((model) => model.value);
     formData.append('models', modelValues.join(','));
     const requestBody = Object.fromEntries(formData);
-    console.log('Request body:', requestBody);
   
     axios
-    .post('http://localhost:3333/trainModels', requestBody, {
-      onUploadProgress: (progressEvent) => {
-        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-        // Assuming that 'progress' is the training progress percentage sent by the server
-        setResults((prevResults) =>
-          prevResults.map((model) => ({
-            ...model,
-            status: progress < 100 ? "Training" : "Finished",
-          }))
-        );
-      },
-    })
-    .then((response) => {
-      const trainedModels = response.data.trainedModels; // Assuming the server returns an array of trained model names
-      setResults(trainedModels.map((modelName) => ({ name: modelName, status: "Finished" })));
-      setAlertMessage(response.data.message);
-      setShowAlert(true);
-      console.log(alertMessage);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-};
+      .post('http://localhost:3333/trainModels', requestBody, {
+        onUploadProgress: (progressEvent) => {
+          const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          // Assuming that 'progress' is the training progress percentage sent by the server
+          setResults((prevResults) =>
+            prevResults.map((model) => ({
+              ...model,
+              status: progress < 100 ? 'Training' : 'Finished',
+            }))
+          );
+        },
+      })
+      .then((response) => {
+        const trainedModels = response.data.trainedModels;
+        setResults(trainedModels.map((modelName) => ({ name: modelName, status: 'Finished' })));
+        setAlertMessage(response.data.message);
+        setShowAlert(true);
+        setShowTrainedModels(true);
+  
+        // Fetch the CSV filenames for each trained model
+        axios
+          .post('http://localhost:3333/getCsvFilenames', { models: trainedModels })
+          .then((response) => {
+            const csvFilenamesResponse = response.data.csvFilenames;
+            setCsvFilenames(csvFilenamesResponse);
+          })
+          .catch((error) => {
+            console.error('Error fetching CSV filenames:', error);
+          });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+  
   
 
 
@@ -433,27 +454,41 @@ const TrainPage = () => {
             </div>
             )} 
             <div>
-              {results.length  > 0 && (
+            {results.length > 0 && (
                 <div className='mb-5'>
                   <h3>Trained Models</h3>
                   <ListGroup>
                     {results.map((model, index) => (
-                      <ListGroup.Item variant="info" key={index}>{model.name} - {model.status}</ListGroup.Item>
+                      <ListGroup.Item variant="info" key={index}>
+                        {model.name} - {model.status}
+                        {csvFilenames[model.name] && (
+                          <div>
+                            CSV File: {csvFilenames[model.name]}
+                          </div>
+                        )}
+                      </ListGroup.Item>
                     ))}
                   </ListGroup>
                 </div>
               )}
             </div>
           </div>
-          {results.length > 0 && (
+          {results.length > 0  && showTrainedModels &&(
+            <div className={stylesTrain.biggerButton}>
+              <Button variant='warning' type="button" className="btn btn-success btn-block" size="lg" onClick={handleEvaluate}>
+                Evaluate
+              </Button>
+            </div>
+          )}
+          {/* {results.length > 0 && (
             <div className={stylesTrain.biggerButton}>
               <Link to="/TestPage">
-              <Button variant='warning' type="button" className="btn btn-success btn-block" size="lg">
+              <Button variant='warning' type="button" className="btn btn-success btn-block" size="lg" onClick={() => setShowTrainedModels(true)}>
                 Evaluate
               </Button>
               </Link>
             </div>
-          )}
+          )} */}
         </form>
       </div>
 

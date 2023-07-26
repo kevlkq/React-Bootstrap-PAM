@@ -265,4 +265,9 @@
   font-size: 40px;
 }
 
+.list-group-item.active {
+  background-color: #28a745;
+  color: #fff;
+  border-color: #28a745;
+}
 

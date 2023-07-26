@@ -17,6 +17,9 @@ import TrainPage from './components/TrainPage';
 import TestPage from './components/TestPage';
 // import ExecutePage from './components/ExecutePage';
 import { AnimatePresence } from 'framer-motion';
+import EvaluatePage from './components/EvaluatePage';
+
+
 
 const Animated = () => {
   const location = useLocation();
@@ -26,6 +29,7 @@ const Animated = () => {
         <Route exact path="/" element={<Home />} />
         <Route exact path="/TrainPage" element={<TrainPage />} />
         <Route exact path="/TestPage" element={<TestPage />} />
+        <Route exact path="/Evaluate" element={<EvaluatePage />} />
 
       </Routes>
     </AnimatePresence>
