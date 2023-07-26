@@ -115,7 +115,7 @@ app.post('/trainModels', (req, res) => {
 
   const trainedModels = []; // Array to store the names of trained models
 
-  const runModel = (modelName, csvFilename, callback) => {
+  const runModel = (modelName, callback) => {
     const options = {
       mode: 'text',
       pythonOptions: ['-u'],
@@ -125,9 +125,7 @@ app.post('/trainModels', (req, res) => {
 
     PythonShell.run(`${modelName}.py`, options)
       .then(() => {
-        // Add the trained model name and CSV filename to the array
-        trainedModels.push({ name: modelName, csvFilename });
-        console.log(`Model trained: ${modelName}, CSV filename: ${path.basename(csvFilePath)}`);
+        trainedModels.push(modelName); // Add the trained model name to the array
         callback();
       })
       .catch((err) => {
@@ -145,7 +143,7 @@ app.post('/trainModels', (req, res) => {
 
     const modelName = selectedModels[index];
     console.log('modelName:', modelName);
-    runModel(modelName, req.body.csvFilename, (err) => {
+    runModel(modelName, (err) => {
       if (err) {
         res.status(500).send(`Error running ${modelName}`);
       } else {

@@ -137,7 +137,6 @@ const TrainPage = () => {
     const selectedModels = document.querySelectorAll('input[name="models"]:checked');
     const modelValues = Array.from(selectedModels).map((model) => model.value);
     formData.append('models', modelValues.join(','));
-    formData.append('csvFilename', outputFilePath);
     const requestBody = Object.fromEntries(formData);
   
     axios
@@ -154,17 +153,22 @@ const TrainPage = () => {
         },
       })
       .then((response) => {
-      const trainedModels = response.data.trainedModels;
-      const updatedResults = trainedModels.map((modelName) => ({
-        name: modelName,
-        status: 'Finished',
-        csvFilename: outputFilePath,
-      }));
-      setResults(updatedResults);
-      setAlertMessage(response.data.message);
-      setShowAlert(true);
-      setShowTrainedModels(true);
-
+        const trainedModels = response.data.trainedModels;
+        setResults(trainedModels.map((modelName) => ({ name: modelName, status: 'Finished' })));
+        setAlertMessage(response.data.message);
+        setShowAlert(true);
+        setShowTrainedModels(true);
+  
+        // Fetch the CSV filenames for each trained model
+        axios
+          .post('http://localhost:3333/getCsvFilenames', { models: trainedModels })
+          .then((response) => {
+            const csvFilenamesResponse = response.data.csvFilenames;
+            setCsvFilenames(csvFilenamesResponse);
+          })
+          .catch((error) => {
+            console.error('Error fetching CSV filenames:', error);
+          });
       })
       .catch((error) => {
         console.error(error);
