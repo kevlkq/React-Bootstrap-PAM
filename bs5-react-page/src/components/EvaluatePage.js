@@ -12,7 +12,7 @@ const EvaluatePage = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const modelNames = params.get('models');
-  const trainedModels = modelNames ? modelNames.split(',') : [];
+  const trainedModelInfo = location.state?.trainedModelInfo || [];
 
   // State to hold the selected models using their names as keys
   const [selectedModels, setSelectedModels] = useState({});
@@ -37,10 +37,10 @@ const EvaluatePage = () => {
     <div className="d-flex justify-content-start align-items-center min-vh-100">
       <Container className="w-25" >
         <h1 className="mb-4">Trained Models</h1>
-        {trainedModels.length > 0 ? (
+        {trainedModelInfo.length > 0 ? (
           <div>
             <ListGroup>
-              {trainedModels.map((modelName) => (
+              {trainedModelInfo.map(([modelName, csvFilename], index) => (
                 <ListGroup horizontal>
                 <ListGroup.Item variant="success"
                   key={modelName}
@@ -56,10 +56,20 @@ const EvaluatePage = () => {
                     onChange={() => handleCheckboxChange(modelName)}
                   />
                 </ListGroup.Item>
-                <ListGroup.Item>csvfilename</ListGroup.Item>
+                <ListGroup.Item>CSV File: {csvFilename}</ListGroup.Item>
                 </ListGroup>
               ))}
             </ListGroup>
+            {/* <ListGroup>
+              {trainedModelInfo.map(([modelName, csvFilename], index) => (
+                <ListGroup.Item variant="info" key={index}>
+                  {modelName} - Finished
+                  <div>
+                    CSV File: {csvFilename}
+                  </div>
+                </ListGroup.Item>
+              ))}
+            </ListGroup> */}
             <Button className="mt-3" variant="primary" block>
               Evaluate Selected Models
             </Button>
