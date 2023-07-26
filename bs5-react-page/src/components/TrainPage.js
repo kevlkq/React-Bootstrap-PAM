@@ -445,6 +445,15 @@ const TrainPage = () => {
               )}
             </div>
           </div>
+          {results.length > 0 && (
+            <div className={stylesTrain.biggerButton}>
+              <Link to="/TestPage">
+              <Button variant='warning' type="button" className="btn btn-success btn-block" size="lg">
+                Evaluate
+              </Button>
+              </Link>
+            </div>
+          )}
         </form>
       </div>
 
