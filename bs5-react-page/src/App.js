@@ -18,7 +18,7 @@ import TestPage from './components/TestPage';
 // import ExecutePage from './components/ExecutePage';
 import { AnimatePresence } from 'framer-motion';
 import EvaluatePage from './components/EvaluatePage';
-
+import RouteWrapper from './components/RouteWrapper';
 
 
 const Animated = () => {

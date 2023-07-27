@@ -25,7 +25,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 
-const TrainPage = () => {
+const TrainPage = ({ initialTrainedModelInfo }) => {
   const [csvFile, setCsvFile] = useState(null);
   const [csvHeaders, setCsvHeaders] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState([]);
@@ -58,8 +58,8 @@ const TrainPage = () => {
   const [results, setResults] = useState([]);
   const [showTrainedModels, setShowTrainedModels] = useState(false);
   const [csvFilenames, setCsvFilenames] = useState({});
-  const [trainedModelInfo, setTrainedModelInfo] = useState([]);
   const navigate = useNavigate()
+  const [trainedModelInfo, setTrainedModelInfo] = useState(initialTrainedModelInfo || []);
 
   const handleEvaluate = () => {
     navigate('/Evaluate', { state: { trainedModelInfo } });
@@ -170,6 +170,7 @@ const TrainPage = () => {
       const modelCsvInfo = trainedModels.map((modelName) => [
         modelName,
         outputFilePath,
+        selectedYVariable, 
       ]);
       setTrainedModelInfo((prevInfo) => [...prevInfo, ...modelCsvInfo]);
 
@@ -221,10 +222,13 @@ const TrainPage = () => {
     }
   };
 
+  useEffect(() => {
+    setTrainedModelInfo(initialTrainedModelInfo || []);
+  }, [initialTrainedModelInfo]);
 
   useEffect(() => {
     setIsYVariableSelected(!!selectedYVariable);
-  }, [selectedColumns, selectedYVariable]);
+  }, [selectedYVariable]);
 
   // useEffect(() => {
   //   setIsModelSelected(false); // Reset the model selected state when Y variable changes
@@ -236,10 +240,10 @@ const TrainPage = () => {
     }
   }, [uploadStatus]);
 
-  // useEffect(() => {
-  //   const selectedModels = document.querySelectorAll('input[name="models"]:checked');
-  //   setIsModelSelected(selectedModels.length > 0);
-  // }, [selectedColumns]);
+  useEffect(() => {
+    const selectedModels = document.querySelectorAll('input[name="models"]:checked');
+    setIsModelSelected(selectedModels.length > 0);
+  }, [selectedColumns]);
 
   useEffect(() => {
     setIsModelSelected(selectedModels.length > 0);
@@ -464,10 +468,7 @@ const TrainPage = () => {
                   <ListGroup>
                     {trainedModelInfo.map(([modelName, csvFilename], index) => (
                       <ListGroup.Item variant="info" key={index}>
-                        {modelName} - Finished
-                        <div>
-                          CSV File: {csvFilename}
-                        </div>
+                        {modelName} - Finished Training
                       </ListGroup.Item>
                     ))}
                   </ListGroup>

@@ -1,0 +1,12 @@
+import React from 'react';
+import { Route } from 'react-router-dom';
+
+const RouteWrapper = ({ component: Component, ...rest }) => {
+  return (
+    <Route {...rest}>
+      <Component {...rest} />
+    </Route>
+  );
+};
+
+export default RouteWrapper;
