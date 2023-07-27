@@ -25,7 +25,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 
-const TrainPage = () => {
+const ExecutePage = () => {
   const [csvFile, setCsvFile] = useState(null);
   const [csvHeaders, setCsvHeaders] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState([]);
@@ -56,16 +56,16 @@ const TrainPage = () => {
   const [isModelSelected, setIsModelSelected] = useState(false);
   const [selectedModels, setSelectedModels] = useState([]);
   const [results, setResults] = useState([]);
-  const [showTrainedModels, setShowTrainedModels] = useState(false);
+  const [showExecutedModels, setShowExecutedModels] = useState(false);
   const [csvFilenames, setCsvFilenames] = useState({});
   const navigate = useNavigate()
-  const [trainedModelInfo, setTrainedModelInfo] = useState([]);
+  const [ExecutedModelInfo, setExecutedModelInfo] = useState([]);
   const [prevSelectedModels, setPrevSelectedModels] = useState([]);
   
   const handleEvaluate = () => {
     const selectedModels = document.querySelectorAll('input[name="models"]:checked');
     const modelNames = Array.from(selectedModels).map((model) => model.value);
-    navigate('/Evaluate', { state: { trainedModelInfo } });
+    navigate('/Evaluate', { state: { ExecutedModelInfo } });
   };
 
   const handleFileChange = (e) => {
@@ -138,7 +138,6 @@ const TrainPage = () => {
   
     const formData = new FormData();
     formData.append('csvFile', csvFile);
-    formData.append('yVariable', selectedYVariable);
     const selectedModels = document.querySelectorAll('input[name="models"]:checked');
     const modelValues = Array.from(selectedModels).map((model) => model.value);
     formData.append('models', modelValues.join(','));
@@ -146,45 +145,33 @@ const TrainPage = () => {
     console.log('Request body:', requestBody);
   
     axios
-    .post('http://localhost:3333/trainModels', requestBody, {
-      onUploadProgress: (progressEvent) => {
-        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-        // Assuming that 'progress' is the training progress percentage sent by the server
-        setResults((prevResults) =>
-          prevResults.map((model) => ({
-            ...model,
-            status: progress < 100 ? "Training" : "Finished",
-          }))
-        );
-      },
-    })
-    .then((response) => {
-      const trainedModels = response.data.trainedModels;
-      const updatedResults = trainedModels.map((modelName) => ({
-        name: modelName,
-        status: 'Finished',
-        csvFilename: outputFilePath,
-      }));
-      
-
-      setResults((prevResults) => [...prevResults, ...updatedResults]);
-
-      setAlertMessage(response.data.message);
-      setShowAlert(true);
-
-      const modelCsvInfo = trainedModels.map((modelName) => [
-        modelName,
-        outputFilePath,
-        selectedYVariable, 
-      ]);
-      setTrainedModelInfo((prevInfo) => [...prevInfo, ...modelCsvInfo]);
-
-
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-};
+      .post('http://localhost:3333/ExecuteModels', requestBody)
+      .then((response) => {
+        const ExecutedModels = response.data.ExecutedModels;
+        const outputFilePath = response.data.outputFilePath;
+  
+        const updatedResults = ExecutedModels.map((modelName) => ({
+          name: modelName,
+          status: 'Finished',
+          csvFilename: outputFilePath,
+        }));
+  
+        setResults((prevResults) => [...prevResults, ...updatedResults]);
+  
+        setAlertMessage(response.data.message);
+        setShowAlert(true);
+  
+        const modelCsvInfo = ExecutedModels.map((modelName) => [
+          modelName,
+          outputFilePath,
+        ]);
+        setExecutedModelInfo((prevInfo) => [...prevInfo, ...modelCsvInfo]);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+  
   
 
 
@@ -252,9 +239,8 @@ const TrainPage = () => {
   }, [selectedModels]);
 
 
-  
-  return (
-    <Transitions>
+ return (
+ <Transitions>
       <header >
         <Navbar bg="warning" data-bs-theme="light">
           <Container>
@@ -268,18 +254,18 @@ const TrainPage = () => {
               />{' '}Oak Consulting</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link as={Link} to="/" >Home</Nav.Link>
-              <Nav.Link href="#link">Link</Nav.Link>
-              <Nav.Link  as={Link} to="/TrainPage">Train</Nav.Link>
-              <Nav.Link as={Link} to="/TestPage">Test</Nav.Link>
-              <Nav.Link as={Link} to="/ExecutePage">Predict</Nav.Link>
-            </Nav>
+              <Nav className="me-auto">
+                <Nav.Link as={Link} to="/" >Home</Nav.Link>
+                <Nav.Link href="#link">Link</Nav.Link>
+                <Nav.Link  as={Link} to="/TrainPage">Train</Nav.Link>
+                <Nav.Link as={Link} to="/TestPage">Test</Nav.Link>
+                <Nav.Link aas={Link} to="/ExecutePage">Predict</Nav.Link>
+              </Nav>
             </Navbar.Collapse>
           </Container>
         </Navbar>
       </header>
-      <legend className="mb-3 mt-5" style={{ fontSize: '36px', fontWeight: 'bold', whiteSpace: 'nowrap', display: 'flex', justifyContent: 'center' }}> Select Models to Train</legend>
+      <legend className="mb-3 mt-5" style={{ fontSize: '36px', fontWeight: 'bold', whiteSpace: 'nowrap', display: 'flex', justifyContent: 'center' }}> Select Models to Execute</legend>
     <div className={stylesTrain.container}>
       <div className={stylesTrain.modelsContainer}>
       
@@ -294,7 +280,7 @@ const TrainPage = () => {
                     type="checkbox"
                     id="LinearRegression"
                     name="models"
-                    value="LinearRegressionTrain"
+                    value="LinearRegressionExecute"
                   />
                   <label className="form-check-label" htmlFor="LinearRegression">
                     Linear Regression
@@ -309,7 +295,7 @@ const TrainPage = () => {
                   type="checkbox"
                   id="KNN"
                   name="models"
-                  value="KNNTrain"
+                  value="KNNExecute"
                 />
                 <label className="form-check-label" htmlFor="KNN">
                   KNN
@@ -324,7 +310,7 @@ const TrainPage = () => {
                   type="checkbox"
                   id="SVM"
                   name="models"
-                  value="SVMTrain"
+                  value="SVMExecute"
                 />
                 <label className="form-check-label" htmlFor="SVM">
                   SVM
@@ -339,7 +325,7 @@ const TrainPage = () => {
                   type="checkbox"
                   id="LSTM"
                   name="models"
-                  value="LSTMTrain"
+                  value="LSTMExecute"
                 />
                 <label className="form-check-label" htmlFor="LSTM">
                   LSTM
@@ -354,7 +340,7 @@ const TrainPage = () => {
                   type="checkbox"
                   id="RandomForest"
                   name="models"
-                  value="RandomForestTrain"
+                  value="RandomForestExecute"
                 />
                 <label className="form-check-label" htmlFor="RandomForest">
                   Random Forest
@@ -369,7 +355,7 @@ const TrainPage = () => {
                   type="checkbox"
                   id="GradientBoost"
                   name="models"
-                  value="GradientBoostTrain"
+                  value="GradientBoostExecute"
                 />
                 <label className="form-check-label" htmlFor="GradientBoost">
                   Gradient Boost
@@ -384,7 +370,7 @@ const TrainPage = () => {
                   type="checkbox"
                   id="XGBoost"
                   name="models"
-                  value="XGBoostTrain"
+                  value="XGBoostExecute"
                 />
                 <label className="form-check-label" htmlFor="XGBoost">
                   XGBoost
@@ -445,9 +431,6 @@ const TrainPage = () => {
               <button type="button" className="btn btn-primary me-3" onClick={handleShowCsvHeaders}>
                 Choose Columns to Drop
               </button>
-              <button type="button" className="btn btn-primary"  onClick={handleChooseY}>
-                Choose Target Variable
-              </button>
             </div>
             )}
             
@@ -463,15 +446,15 @@ const TrainPage = () => {
                 type="submit"
                 className="btn btn-success"
                 onClick={handleSubmit}
-                disabled={!isYVariableSelected || !isModelSelected}
+                disabled={!csvFile}
 
               >
-                Train Selected Models
+                Execute Selected Models
               </button>
               </div>
-              {showToolTip && (!isModelSelected || !isYVariableSelected) && (
+              {showToolTip && selectedColumns===0 && (
               <div>
-                Choose a Model to Train and Target Variable First
+                Choose a Model to Execute and Target Variable First
               </div>
             )}
 
@@ -484,11 +467,11 @@ const TrainPage = () => {
             <div>
               {results.length  > 0 && (
                 <div className='mb-5'>
-                  <h3>Trained Models</h3>
+                  <h3>Executeed Models</h3>
                   <ListGroup>
-                    {trainedModelInfo.map(([modelName, csvFilename], index) => (
+                    {ExecutedModelInfo.map(([modelName], index) => (
                       <ListGroup.Item variant="info" key={index}>
-                        {modelName} - Finished Training
+                        {modelName} - Finished Executing
                       </ListGroup.Item>
                     ))}
                   </ListGroup>
@@ -496,7 +479,7 @@ const TrainPage = () => {
               )}
             </div>
           </div>
-          {results.length > 0  && trainedModelInfo.length> 0 &&(
+          {results.length > 0  && ExecutedModelInfo.length> 0 &&(
             <div className={stylesTrain.biggerButton}>
               <Button variant='warning' type="button" className="btn btn-success btn-block" size="lg" onClick={handleEvaluate}>
                 Evaluate
@@ -515,6 +498,4 @@ const TrainPage = () => {
   );
 };
 
-export default TrainPage;
-
-
+export default ExecutePage;

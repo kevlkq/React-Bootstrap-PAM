@@ -15,11 +15,9 @@ import { useLocation } from 'react-router-dom';
 import Home from './components/Home';
 import TrainPage from './components/TrainPage';
 import TestPage from './components/TestPage';
-// import ExecutePage from './components/ExecutePage';
+import ExecutePage from './components/ExecutePage';
 import { AnimatePresence } from 'framer-motion';
 import EvaluatePage from './components/EvaluatePage';
-import RouteWrapper from './components/RouteWrapper';
-
 
 const Animated = () => {
   const location = useLocation();
@@ -30,7 +28,7 @@ const Animated = () => {
         <Route exact path="/TrainPage" element={<TrainPage />} />
         <Route exact path="/TestPage" element={<TestPage />} />
         <Route exact path="/Evaluate" element={<EvaluatePage />} />
-
+        <Route exact path="/ExecutePage" element={<ExecutePage />} />  
       </Routes>
     </AnimatePresence>
   );

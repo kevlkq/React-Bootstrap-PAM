@@ -14,6 +14,8 @@ const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const csvWriter = require('csv-write-stream');
 let uploadedCsvFilePath = '';
 let editedCsvFilePath = ''; // Declare the global variable for edited CSV file path
+const cors = require('cors');
+app.use(cors());
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000'); // Replace with the URL of your React development server
@@ -158,7 +160,7 @@ app.post('/trainModels', (req, res) => {
 
 
 app.post('/testModels', (req, res) => {
-  const csvFilePath = uploadedCsvFilePath;
+  const csvFilePath =`uploads/${ req.body.csvFileNames}`;
   const selectedModels = req.body.models.split(',');
   const y = req.body.yVariable;
 
@@ -224,7 +226,6 @@ app.post('/testModels', (req, res) => {
 app.post('/executeModels', (req, res) => {
   const csvFilePath = uploadedCsvFilePath;
   const selectedModels = req.body.models.split(',');
-  // const y = req.body.yVariable;
 
   const runModel = (modelName) => {
     return new Promise((resolve, reject) => {
@@ -234,11 +235,11 @@ app.post('/executeModels', (req, res) => {
         scriptPath: path.join(__dirname, 'Execute'),
         args: [csvFilePath],
       };
-  
+
       PythonShell.run(`${modelName}.py`, options)
-        .then((results) => {
+        .then(() => {
           console.log('Predictions saved at /uploads');
-          resolve({ modelName});
+          resolve({ modelName, csvFilePath });
         })
         .catch((err) => {
           console.error(err);
@@ -249,15 +250,7 @@ app.post('/executeModels', (req, res) => {
   
   const processNextModel = (index, selectedModels, modelResults) => {
     if (index >= selectedModels.length) {
-      const resultObject = {};
-      for (const result of modelResults) {
-        resultObject[result.modelName] = {
-          rmse: result.rmse,
-          r2error: result.r2error,
-        };
-      }
-      const jsonResponse = JSON.stringify(resultObject, null, 2);
-      res.status(200).type('json').send(jsonResponse);
+      res.status(200).send(modelResults); 
       return;
     }
   
@@ -275,8 +268,6 @@ app.post('/executeModels', (req, res) => {
   };
   
   processNextModel(0, selectedModels, []);
-  
-  
 });
 
 const port = process.env.REACT_APP_SERVER_PORT || 3333;

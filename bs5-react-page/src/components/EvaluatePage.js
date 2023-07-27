@@ -21,7 +21,7 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import TrainPage from './TrainPage';
-
+import Table from 'react-bootstrap/Table';
 
 const EvaluatePage = () => {
   const location = useLocation();
@@ -30,7 +30,19 @@ const EvaluatePage = () => {
   const trainedModelInfo = location.state?.trainedModelInfo || [];
   const navigate = useNavigate();
   const [selectedModels, setSelectedModels] = useState({});
+  const [evaluationResults, setEvaluationResults] = useState([]);
 
+
+
+
+  const removeTrainFromModelName = (modelName) => {
+    if (modelName.includes("Train")) {
+      return modelName.replace("Train", "").trim();
+    } else {
+      return modelName;
+    }
+  };
+  
   const handleCheckboxChange = (modelName) => {
     setSelectedModels((prevSelected) => ({
       ...prevSelected,
@@ -38,7 +50,7 @@ const EvaluatePage = () => {
     }));
   };
 
-  const handleEvaluateModels = () => {
+  const handleEvaluateModels = async () => {
     const selectedModelNames = Object.keys(selectedModels).filter(
       (modelName) => selectedModels[modelName]
     );
@@ -48,16 +60,50 @@ const EvaluatePage = () => {
       return;
     }
   
-    axios
-      .post('/testmodels', { models: selectedModelNames })
-      .then((response) => {
+    const evaluationResultsArray = [];
+  
+    for (const modelName of selectedModelNames) {
+      const testModelName = modelName.replace('Train', 'Test');
+  
+      const csvFileName = trainedModelInfo.find((info) => info[0] === modelName)?.[1];
+      const targetVariable = trainedModelInfo.find((info) => info[0] === modelName)?.[2];
+  
+      if (!csvFileName || !targetVariable) {
+        console.log(`CSV file or target variable not found for model: ${modelName}`);
+        continue;
+      }
+  
+      try {
+        const response = await axios.post('http://localhost:3333/testModels', {
+          models: testModelName,
+          csvFileNames: [csvFileName],
+          yVariable: [targetVariable],
+        });
+  
         const evaluationScores = response.data;
-        console.log('Evaluation scores:', evaluationScores);
-      })
-      .catch((error) => {
-        console.error('Error during evaluation:', error);
-      });
+        const { r2error, rmse } = evaluationScores[testModelName];
+  
+        evaluationResultsArray.push({
+          modelName,
+          r2error: parseFloat(r2error),
+          rmse: parseFloat(rmse),
+        });
+      } catch (error) {
+        console.error(`Error during evaluation for model ${modelName}:`, error);
+        evaluationResultsArray.push({
+          modelName,
+          r2error: 'Error',
+          rmse: 'Error',
+        });
+      }
+    }
+  
+    setEvaluationResults(evaluationResultsArray);
   };
+  
+  
+  
+  
 
   // Function to handle clicking the model name in the list group
   const handleModelClick = (modelName) => {
@@ -83,13 +129,11 @@ const EvaluatePage = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/" >HomePage</Nav.Link>
-            <Nav.Link href="#link">Link</Nav.Link>
-            <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-            <NavDropdown.Item as={Link} to="/TrainPage">Training Page</NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/TestPage">Testing Page</NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/ExecutePage">Predictions Page</NavDropdown.Item>
-            </NavDropdown>
+          <Nav.Link as={Link} to="/" >Home</Nav.Link>
+          <Nav.Link href="#link">Link</Nav.Link>
+          <Nav.Link  as={Link} to="/TrainPage">Train</Nav.Link>
+          <Nav.Link as={Link} to="/TestPage">Test</Nav.Link>
+          <Nav.Link aas={Link} to="/ExecutePage">Predict</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
@@ -109,7 +153,7 @@ const EvaluatePage = () => {
                       className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center ${selectedModels[modelName] ? 'active' : ''}`}
                       onClick={() => handleModelClick(modelName)}
                     >
-                      {modelName}
+                      {removeTrainFromModelName(modelName)}
                       <Form.Check
                         type="checkbox"
                         className="ms-3 "
@@ -135,8 +179,38 @@ const EvaluatePage = () => {
               Back to Train Page
             </Button>
           </div>
+
+
         </Container>
-      </div>
+      </div >
+      <Container style={{ width: '60%', alignContent: 'center', marginTop:'20px', marginBottom:'50px'}}>
+
+          <h2 className="text-center">Model Evaluation Results</h2>
+            <Table striped bordered hover responsive size="lg">
+              <thead>
+                <tr>
+                <th style={{ width: '150px' }}>Model Name</th>
+                <th style={{ width: '150px' }}>R-squared Score</th>
+                <th style={{ width: '150px' }}>Root Mean Squared Error</th>
+                </tr>
+              </thead>
+              <tbody>
+              {evaluationResults.map((result, index) => (
+                  <tr key={index}>
+                    <td style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {result.modelName}
+                    </td>
+                    <td style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {result.r2error}
+                    </td>
+                    <td style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {result.rmse}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+      </Container>
     </Transitions>
   );
 };

@@ -40,15 +40,13 @@ const Home = () => {
                 />{' '}Oak Consulting</Navbar.Brand>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="me-auto">
-                  <Nav.Link as={Link} to="/" >HomePage</Nav.Link>
-                  <Nav.Link href="#link">Link</Nav.Link>
-                  <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-                  <NavDropdown.Item as={Link} to="/TrainPage">Training Page</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/TestPage">Testing Page</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/ExecutePage">Predictions Page</NavDropdown.Item>
-                  </NavDropdown>
-                </Nav>
+              <Nav className="me-auto">
+                <Nav.Link as={Link} to="/" >Home</Nav.Link>
+                <Nav.Link href="#link">Link</Nav.Link>
+                <Nav.Link  as={Link} to="/TrainPage">Train</Nav.Link>
+                <Nav.Link as={Link} to="/TestPage">Test</Nav.Link>
+                <Nav.Link as={Link} to="/ExecutePage">Predict</Nav.Link>
+              </Nav>
               </Navbar.Collapse>
             </Container>
           </Navbar>
@@ -101,7 +99,9 @@ const Home = () => {
                 <Card.Text>
                    Here you can Test your model using your dataset
                 </Card.Text>
+                <Link to="/TestPage"> 
                 <Button variant="primary">Go to Test Page</Button>
+                </Link>
               </Card.Body>
             </Card>
             </Col>
@@ -114,7 +114,9 @@ const Home = () => {
                 <Card.Text>
                   Here you can predict results of dataset through your trained model
                 </Card.Text>
+                <Link to="/ExecutePage"> 
                 <Button variant="primary">Go to Predict Page</Button>
+                </Link>
               </Card.Body>
             </Card>
             </Col>
