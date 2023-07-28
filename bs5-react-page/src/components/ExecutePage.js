@@ -59,13 +59,16 @@ const ExecutePage = () => {
   const [showExecutedModels, setShowExecutedModels] = useState(false);
   const [csvFilenames, setCsvFilenames] = useState({});
   const navigate = useNavigate()
-  const [ExecutedModelInfo, setExecutedModelInfo] = useState([]);
+  const [E, setE] = useState([]);
   const [prevSelectedModels, setPrevSelectedModels] = useState([]);
-  
+  const [executedModelInfo, setExecutedModelInfo] = useState([]);
+  const [ExecutedModelsInfo, setExecutedModelsInfo] = useState([]);
+
+
   const handleEvaluate = () => {
     const selectedModels = document.querySelectorAll('input[name="models"]:checked');
     const modelNames = Array.from(selectedModels).map((model) => model.value);
-    navigate('/Evaluate', { state: { ExecutedModelInfo } });
+    navigate('/Evaluate', { state: { E } });
   };
 
   const handleFileChange = (e) => {
@@ -145,15 +148,15 @@ const ExecutePage = () => {
     console.log('Request body:', requestBody);
   
     axios
-      .post('http://localhost:3333/ExecuteModels', requestBody)
+      .post('http://localhost:3333/executeModels', requestBody)
       .then((response) => {
-        const ExecutedModels = response.data.ExecutedModels;
-        const outputFilePath = response.data.outputFilePath;
+        const executedModels = response.data.executedModels;
+        const outputFilePaths = response.data.outputFilePaths;
   
-        const updatedResults = ExecutedModels.map((modelName) => ({
+        const updatedResults = executedModels.map((modelName, index) => ({
           name: modelName,
           status: 'Finished',
-          csvFilename: outputFilePath,
+          csvFilename: outputFilePaths[index],
         }));
   
         setResults((prevResults) => [...prevResults, ...updatedResults]);
@@ -161,16 +164,18 @@ const ExecutePage = () => {
         setAlertMessage(response.data.message);
         setShowAlert(true);
   
-        const modelCsvInfo = ExecutedModels.map((modelName) => [
-          modelName,
-          outputFilePath,
-        ]);
-        setExecutedModelInfo((prevInfo) => [...prevInfo, ...modelCsvInfo]);
+        // Create an object with model names as keys and their respective file paths as values
+        const modelFilepaths = {};
+        executedModels.forEach((modelName, index) => {
+          modelFilepaths[modelName] = outputFilePaths[index];
+        });
+        setExecutedModelsInfo(modelFilepaths);
       })
       .catch((error) => {
         console.error(error);
       });
   };
+  
   
   
 
@@ -465,21 +470,32 @@ const ExecutePage = () => {
             </div>
             )} 
             <div>
-              {results.length  > 0 && (
-                <div className='mb-5'>
-                  <h3>Executeed Models</h3>
-                  <ListGroup>
-                    {ExecutedModelInfo.map(([modelName], index) => (
-                      <ListGroup.Item variant="info" key={index}>
-                        {modelName} - Finished Executing
+            {results.length > 0 && (
+              <div className='mb-5'>
+                <h3>Executed Models</h3>
+                <ListGroup>
+                  {Object.entries(ExecutedModelsInfo).map(([modelName, csvFilePath]) => (
+                    <ListGroup horizontal>
+                      <ListGroup.Item variant="info" style={{ width: '400px', marginTop: '10px' }}>
+                        <div className="d-flex justify-content-center align-items-center" style={{ marginTop: '20px' }}>
+                          {modelName} - Finished Executing
+                        </div>
                       </ListGroup.Item>
-                    ))}
-                  </ListGroup>
-                </div>
-              )}
+                      <ListGroup.Item variant="info" style={{ width: '200px', marginTop: '10px' }}>
+                        <a href={csvFilePath} target="_blank" rel="noopener noreferrer">
+                        <button type="button" className="btn btn-primary me-3" onClick={handlePreviewDataset}>
+                              Show Predicted Results
+                        </button>
+                        </a>
+                      </ListGroup.Item>
+                    </ListGroup>
+                  ))}
+                </ListGroup>
+              </div>
+            )}
             </div>
           </div>
-          {results.length > 0  && ExecutedModelInfo.length> 0 &&(
+          {results.length > 0  && E.length> 0 &&(
             <div className={stylesTrain.biggerButton}>
               <Button variant='warning' type="button" className="btn btn-success btn-block" size="lg" onClick={handleEvaluate}>
                 Evaluate

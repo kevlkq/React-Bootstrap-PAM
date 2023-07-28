@@ -9,7 +9,7 @@ import pandas as pd
 from sklearn.metrics import r2_score, mean_squared_error
 
 
-model_path = r'C:\Users\luake\Github\React_PAM\Server\models\LinearRegression_model.joblib'
+model_path = r'C:\Users\luake\Github\React-Bootstrap-PAM\Server\models\LinearRegression_model.joblib'
 model = joblib.load(model_path)
 csv_file_path = sys.argv[1]
 df = pd.read_csv(csv_file_path)

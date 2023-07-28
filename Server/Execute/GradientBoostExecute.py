@@ -7,10 +7,10 @@ from sklearn.metrics import mean_squared_error
 import joblib
 from sklearn.ensemble import GradientBoostingRegressor
 
-model_path = r'C:\Users\luake\Github\React_PAM\Server\models\gradient_boosting_model.joblib'
+model_path = r'C:\Users\luake\Github\React-Bootstrap-PAM\Server\models\gradient_boosting_model.joblib'
 model = joblib.load(model_path)
 csv_file_path = sys.argv[1]
-output_csv_path = r'C:\Users\luake\Github\React_PAM\Server\Predictions\predicted_results_Gradient_Boost.csv'
+output_csv_path = r'C:\Users\luake\Github\React-Bootstrap-PAM\Server\Predictions\predicted_results_Gradient_Boost.csv'
 df = pd.read_csv(csv_file_path)
 
 x_columns = df.columns
@@ -23,6 +23,7 @@ output_csv_file_path = 'Predictions/predicted_results_GradientBoost.csv'
 df.to_csv(output_csv_file_path, index=False)
 
 print("Predictions saved to predicted_results_GradientBoost.csv")
+
 
 
 

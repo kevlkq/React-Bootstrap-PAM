@@ -6,10 +6,10 @@ from sklearn.metrics import r2_score, mean_squared_error
 import joblib
 import sys
 
-model_path = r'C:\Users\luake\Github\React_PAM\Server\models\xgboost_model.joblib'
+model_path = r'C:\Users\luake\Github\React-Bootstrap-PAM\Server\models\xgboost_model.joblib'
 model = joblib.load(model_path)
 csv_file_path = sys.argv[1]
-output_csv_path = r'C:\Users\luake\Github\React_PAM\Server\Predictions\predicted_results_XGBoost.csv'
+output_csv_path = r'C:\Users\luake\Github\React-Bootstrap-PAM\Server\Predictions\predicted_results_XGBoost.csv'
 df = pd.read_csv(csv_file_path)
 
 x_columns = df.columns

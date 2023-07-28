@@ -32,7 +32,7 @@ import sklearn
 
 csv_file_path = sys.argv[1]
 
-model_path = r'C:\Users\luake\Github\React_PAM\Server\models\lstm_model.joblib'
+model_path = r'C:\Users\luake\Github\React-Bootstrap-PAM\Server\models\lstm_model.joblib'
 model = joblib.load(model_path)
 
 df = pd.read_csv(csv_file_path)

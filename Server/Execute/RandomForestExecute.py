@@ -9,10 +9,10 @@ import joblib
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.preprocessing import MinMaxScaler
 
-model_path = r'C:\Users\luake\Github\React_PAM\Server\models\random_forest_model.joblib'
+model_path = r'C:\Users\luake\Github\React-Bootstrap-PAM\Server\models\random_forest_model.joblib'
 model = joblib.load(model_path)
 csv_file_path = sys.argv[1]
-output_csv_path = r'C:\Users\luake\Github\React_PAM\Server\Predictions\predicted_results_Random_Forest.csv'
+output_csv_path = r'C:\Users\luake\Github\React-Bootstrap-PAM\Server\Predictions\predicted_results_Random_Forest.csv'
 df = pd.read_csv(csv_file_path)
 
 x_columns = df.columns

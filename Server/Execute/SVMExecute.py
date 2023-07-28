@@ -8,10 +8,10 @@ import joblib
 from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler
 
-model_path = r'C:\Users\luake\Github\React_PAM\Server\models\svm_model.joblib'
+model_path = r'C:\Users\luake\Github\React-Bootstrap-PAM\Server\models\svm_model.joblib'
 model = joblib.load(model_path)
 csv_file_path = sys.argv[1]
-output_csv_path = r'C:\Users\luake\Github\React_PAM\Server\Predictions\predicted_results_SVM.csv'
+output_csv_path = r'C:\Users\luake\Github\React-Bootstrap-PAM\Server\Predictions\predicted_results_SVM.csv'
 df = pd.read_csv(csv_file_path)
 
 x_columns = df.columns

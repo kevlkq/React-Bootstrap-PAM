@@ -226,48 +226,53 @@ app.post('/testModels', (req, res) => {
 app.post('/executeModels', (req, res) => {
   const csvFilePath = uploadedCsvFilePath;
   const selectedModels = req.body.models.split(',');
+  const executedModels = [];
+  const outputFilePaths = {}; // Object to store output file paths for each executed model
 
-  const runModel = (modelName) => {
-    return new Promise((resolve, reject) => {
-      const options = {
-        mode: 'text',
-        pythonOptions: ['-u'],
-        scriptPath: path.join(__dirname, 'Execute'),
-        args: [csvFilePath],
-      };
+  const runModel = (modelName, callback) => {
+    const options = {
+      mode: 'text',
+      pythonOptions: ['-u'],
+      scriptPath: path.join(__dirname, 'Execute'),
+      args: [csvFilePath],
+    };
 
-      PythonShell.run(`${modelName}.py`, options)
-        .then(() => {
-          console.log('Predictions saved at /uploads');
-          resolve({ modelName, csvFilePath });
-        })
-        .catch((err) => {
-          console.error(err);
-          reject(`Error running ${modelName}`);
-        });
-    });
-  };
-  
-  const processNextModel = (index, selectedModels, modelResults) => {
-    if (index >= selectedModels.length) {
-      res.status(200).send(modelResults); 
-      return;
-    }
-  
-    const modelName = selectedModels[index];
-    console.log('modelName:', modelName);
-  
-    runModel(modelName)
-      .then((result) => {
-        modelResults.push(result);
-        processNextModel(index + 1, selectedModels, modelResults);
+    PythonShell.run(`${modelName}.py`, options)
+      .then(() => {
+        console.log('Predictions saved at /Predictions');
+        executedModels.push(modelName);
+        outputFilePaths[modelName] = `/Predictions/predicted_results_${modelName.replace('Execute', '')}.csv`;
+        console.log(outputFilePaths[modelName]);
+        callback();
       })
       .catch((err) => {
-        res.status(500).send(err);
+        console.error(err);
+        callback(err);
       });
   };
-  
-  processNextModel(0, selectedModels, []);
+
+  const processNextModel = (index) => {
+    if (index >= selectedModels.length) {
+      console.log('Finished executing all models');
+      
+      res.send({ message: 'All models executed successfully!', executedModels, outputFilePaths });
+      return;
+    }
+
+    const modelName = selectedModels[index];
+    console.log('modelName:', modelName);
+
+    runModel(modelName, (err) => {
+      if (err) {
+        res.status(500).send(`Error running ${modelName}`);
+      } else {
+        console.log(csvFilePath);
+        processNextModel(index + 1);
+      }
+    });
+  };
+
+  processNextModel(0);
 });
 
 const port = process.env.REACT_APP_SERVER_PORT || 3333;
