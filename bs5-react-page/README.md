@@ -2,6 +2,20 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+To start react app, cd to bs5-react-page, type npm start
+To start node server, cs to Server, type node server.js
+Both must be running for app to work
+
+## install modules
+npm install react
+npm install react-script
+npm install react-router-dom
+npm install react-bootstrap
+npm install react-dom
+npm install framer motion
+npm install boostrap
+npm install axios
+
 ## Available Scripts
 
 In the project directory, you can run:
